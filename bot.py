@@ -29,6 +29,7 @@ def get_weather_handler(message):
     last_message = message
     global last_city
     last_city = city
+    global flag
     flag = True
     bot.register_next_step_handler(city, send_weather)
 
@@ -114,9 +115,10 @@ def send_scheduled():
 
 def scheduler():
     while not flag:
-        continue
-    while flag:
         print('scheduler works')
+        time.sleep(1)
+    while flag:
+        print('scheduler changed and works')
         schedule.every(1).seconds.do(send_scheduled)
         while True:
             schedule.run_pending()
@@ -129,10 +131,10 @@ def main():
 
 
 if __name__ == '__main__':
-    t2 = threading.Thread(target = scheduler)
     t1 = threading.Thread(target = main)
+    t2 = threading.Thread(target = scheduler)
 
     # lambda: bot.polling(non_stop = True)
 
-    t2.start()
     t1.start()
+    t2.start()
