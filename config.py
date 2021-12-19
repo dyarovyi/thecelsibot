@@ -4,6 +4,7 @@ URL = 'https://api.openweathermap.org/data/2.5/weather'
 
 HELP_STR = '''
 Hi, I am Celsi bot. ☀️
+
 My job is helping you to chek weather at a specific location and to send you daily forecasts.
 
 To start, choose one of the commads below:
