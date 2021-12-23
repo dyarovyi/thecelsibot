@@ -29,7 +29,8 @@ def welcome_handler(message):
 def get_weather_handler(message):
     city_message = bot.send_message(message.chat.id, "Enter the city:")
 
-    if message.text == 'getweathertoday' or message.text == 'Weather today':
+    if message.text == '/getweathertoday' or message.text == 'Weather today':
+        bot.send_message(message.chat.id, message.text)
         bot.register_next_step_handler(city_message, send_weather_today)
     else:
         bot.register_next_step_handler(city_message, send_weather_now)
@@ -164,8 +165,6 @@ def thread_handler(message):
         running = True
         scheduler_thread = threading.Thread(target = lambda: scheduler(message))
         scheduler_thread.start()
-
-    
 
 
 def scheduler(message):
