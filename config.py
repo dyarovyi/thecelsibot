@@ -7,12 +7,14 @@ Hi, I am Celsi bot. ☀️
 My job is helping you to chek weather at a specific location and to send you daily forecasts.
 
 To start, choose one of the commads below:
-/getweathernow - to check current weather at a specific location
-/getweathertoday - to forecast at a specific location for today
-/help - to get help
+🔹 /getweathernow - to check current weather at a specific location
+🔹 /getweathertoday - to forecast at a specific location for today
+🔹 /setscheduled - to set location for scheduled forecasts (every 6 hours)
+🔹 /stopscheduled - to stop getting scheduled forecasts
+🔹 /help - to get help
 '''
 
-FULL_FORECAST_STR = '''It will be between {}ºC and {}ºC and {} in {} today{}.
-The sun will rise at {} AM🌒 and set at {} PM🌔.
-The wind will be {} m/s, pressure {} GPa, and humidity {}%.
+FULL_FORECAST_STR = '''{} It will be between {}ºC and {}ºC and {} in {} today.
+• The sun will rise at {} AM🌒 and set at {} PM🌔.
+• The wind will be {} m/s, pressure {} GPa, and humidity {}%.
 '''

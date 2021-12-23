@@ -1,37 +1,27 @@
-import re
 import telebot
 import requests
-import schedule
 import config
 import time
 import threading
-from telebot.types import KeyboardButton, Message
+from telebot.types import KeyboardButton
 from threading import Thread
 
+UPDATE_TIME = 4 # 60 * 60 * 6 # - every 6 hours
+
 bot = telebot.TeleBot(config.BOT_TOKEN)
-scheduler_thread = Thread(target = None)
-
-
-class Parameters:
-    '''This is a class to store parameters passing to send_weather'''
-
-    def __init__(self, message, full = False) -> None:
-        self.message = message
-        self.full = full
-
-    def get_message(self):
-        return self.message
-
-    def get_full(self):
-        return self.full
+scheduler_thread = threading.Thread(target = lambda: None)
+running = False
 
 
 # BOT HANDLERS
 
 @bot.message_handler(commands = ['start', 'welcome'])
 def welcome_handler(message):
-    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard = True)
-    markup.add(KeyboardButton('Weather now'), KeyboardButton('Weather today'))
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard = True, row_width = 2)
+    markup.add(KeyboardButton('Weather now'), 
+        KeyboardButton('Weather today'),
+        KeyboardButton('Set scheduled'), 
+        KeyboardButton('Stop scheduled'))
     bot.send_message(message.chat.id, config.INFO_STR, reply_markup = markup)
 
 
@@ -39,17 +29,28 @@ def welcome_handler(message):
 def get_weather_handler(message):
     city_message = bot.send_message(message.chat.id, "Enter the city:")
 
-    print(message.text)
     if message.text == 'getweathertoday' or message.text == 'Weather today':
         bot.register_next_step_handler(city_message, send_weather_today)
     else:
         bot.register_next_step_handler(city_message, send_weather_now)
 
 
-@bot.message_handler(commands = ['setlocation'])
-def set_location_handler(message):
+@bot.message_handler(commands = ['setscheduled'])
+def set_scheduled_handler(message):
     city_message = bot.send_message(message.chat.id, "Enter the city:")
     bot.register_next_step_handler(city_message, thread_handler)
+
+
+@bot.message_handler(commands = ['stopscheduled'])
+def stop_scheduled_handler(message):
+    global running
+    global scheduler_thread
+
+    if running:
+        running = False
+        scheduler_thread.join()
+
+    bot.send_message(message.chat.id, 'You will no longer get scheduled forecasts.')
 
 
 @bot.message_handler(commands = ['help'])
@@ -63,8 +64,10 @@ def echo_handler(message):
         welcome_handler(message)
     elif message.text in ('Weather now', 'Weather today'):
         get_weather_handler(message)
-    elif message.text == 'Set location':
-        set_location_handler(message)
+    elif message.text == 'Set scheduled':
+        set_scheduled_handler(message)
+    elif message.text == 'Stop scheduled':
+        stop_scheduled_handler(message)
     elif message.text == 'Help':
         help_handler(message)
     else:
@@ -121,7 +124,7 @@ def format_response(weather, full = False):
             sunrise = time.strftime("%I:%M", time.localtime(weather['sys']['sunrise']))
             sunset = time.strftime("%I:%M", time.localtime(weather['sys']['sunset']))
 
-            return config.FULL_FORECAST_STR.format(temperature_min, temperature_max, conditions, city, get_emoji(int(id)), sunrise, sunset, wind, pressure, humidity)
+            return config.FULL_FORECAST_STR.format(get_emoji(int(id)), temperature_min, temperature_max, conditions, city, sunrise, sunset, wind, pressure, humidity)
         else:
             return 'It is {}ºC and {} in {} {}.'.format(temperature, conditions, city, get_emoji(int(id)))
     except:
@@ -150,17 +153,27 @@ def get_emoji(id: int):
 
 
 def thread_handler(message):
-    scheduler_thread = threading.Thread(target = lambda: scheduler(message))
-    scheduler_thread.start()
+    global running
+    global scheduler_thread
+
+    if running:
+        running = False
+        scheduler_thread.join()
+
+    if not running:
+        running = True
+        scheduler_thread = threading.Thread(target = lambda: scheduler(message))
+        scheduler_thread.start()
+
+    
 
 
 def scheduler(message):
     '''This function sets scheduled forecasts'''
 
-    while True:
-        time.sleep(2)
-        print('weather')
-        send_weather(message)
+    while running:
+        send_weather(message, True)
+        time.sleep(UPDATE_TIME)
 
 
 if __name__ == '__main__':
