@@ -6,7 +6,7 @@ import threading
 from telebot.types import KeyboardButton
 from threading import Thread
 
-UPDATE_TIME = 4 # 60 * 60 * 6 # - every 6 hours
+UPDATE_TIME = 60 * 60 * 6 # - every 6 hours
 
 bot = telebot.TeleBot(config.BOT_TOKEN)
 scheduler_thread = threading.Thread(target = lambda: None)
@@ -30,7 +30,6 @@ def get_weather_handler(message):
     city_message = bot.send_message(message.chat.id, "Enter the city:")
 
     if message.text == '/getweathertoday' or message.text == 'Weather today':
-        bot.send_message(message.chat.id, message.text)
         bot.register_next_step_handler(city_message, send_weather_today)
     else:
         bot.register_next_step_handler(city_message, send_weather_now)
