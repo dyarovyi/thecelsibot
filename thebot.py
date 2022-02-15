@@ -3,8 +3,7 @@ import requests
 import config
 import time
 import threading
-from telebot.types import KeyboardButton
-from threading import Thread
+import telebot.types
 
 UPDATE_TIME = 60 * 60 * 6 # - every 6 hours
 
@@ -18,10 +17,10 @@ running = False
 @bot.message_handler(commands = ['start', 'welcome'])
 def welcome_handler(message):
     markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard = True, row_width = 2)
-    markup.add(KeyboardButton('Weather now'), 
-        KeyboardButton('Weather today'),
-        KeyboardButton('Set scheduled'), 
-        KeyboardButton('Stop scheduled'))
+    markup.add(telebot.types.KeyboardButton('Weather now'), 
+        telebot.types.KeyboardButton('Weather today'),
+        telebot.types.KeyboardButton('Set scheduled'), 
+        telebot.types.KeyboardButton('Stop scheduled'))
     bot.send_message(message.chat.id, config.INFO_STR, reply_markup = markup)
 
 
